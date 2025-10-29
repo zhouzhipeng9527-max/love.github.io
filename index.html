@@ -121,7 +121,7 @@
             barrage.style.top = top + 'px';
             
             // 更快的动画速度 (1-2秒)
-            const duration = 1 + Math.random() * 1;
+            const duration = 2 + Math.random() * 2;
             barrage.style.animationDuration = duration + 's';
             
             // 随机动画延迟
@@ -145,7 +145,7 @@
             }
             
             // 持续创建新弹幕
-            setInterval(createBarrage, 30);
+            setInterval(createBarrage, 10);
         }
         
         // 页面加载完成后启动
