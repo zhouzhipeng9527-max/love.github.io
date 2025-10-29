@@ -20,9 +20,9 @@
         
         .barrage {
             position: absolute;
-            padding: 8px 14px;
-            border-radius: 18px;
-            font-size: 16px;
+            padding: 6px 12px; /* 调小内边距 */
+            border-radius: 15px;
+            font-size: 10px; /* 调小字体 */
             font-weight: bold;
             color: #333;
             white-space: nowrap;
@@ -30,9 +30,7 @@
             z-index: 1000;
             opacity: 0;
             transform: scale(0.8);
-            /* 去掉边框阴影 */
             box-shadow: none;
-            /* 添加半透明背景 */
             background-color: rgba(255, 255, 255, 0.9);
         }
         
@@ -57,15 +55,18 @@
         
         .title {
             position: fixed;
-            top: 20px;
+            top: 15px;
             left: 0;
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 20px;
+            font-size: 12px; /* 调小标题字体 */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
             padding: 0 10px;
+            /* 添加固定定位，防止抖动 */
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
     </style>
 </head>
@@ -105,27 +106,19 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 改进的位置分布算法
+            // 完全随机的位置分布，包括边缘和超出屏幕
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             
-            // 将屏幕划分为网格，确保均匀分布
-            const gridCols = 4; // 水平方向4列
-            const gridRows = 6; // 垂直方向6行
+            // 允许弹幕出现在屏幕外的一定范围内
+            const extendRange = 50; // 允许超出屏幕50px
             
-            const col = Math.floor(Math.random() * gridCols);
-            const row = Math.floor(Math.random() * gridRows);
+            // 完全随机的位置，包括负值和超出屏幕的值
+            const left = Math.random() * (screenWidth + extendRange * 2) - extendRange;
+            const top = Math.random() * (screenHeight + extendRange * 2) - extendRange;
             
-            // 计算网格单元大小
-            const cellWidth = screenWidth / gridCols;
-            const cellHeight = (screenHeight - 100) / gridRows; // 减去标题区域
-            
-            // 在网格单元内随机位置
-            const left = col * cellWidth + Math.random() * (cellWidth - 100);
-            const top = 60 + row * cellHeight + Math.random() * (cellHeight - 40); // 从标题下方开始
-            
-            barrage.style.left = Math.max(10, Math.min(left, screenWidth - 150)) + 'px';
-            barrage.style.top = Math.max(60, Math.min(top, screenHeight - 60)) + 'px';
+            barrage.style.left = left + 'px';
+            barrage.style.top = top + 'px';
             
             // 保持原有的速度设置
             const duration = 2 + Math.random() * 2;
