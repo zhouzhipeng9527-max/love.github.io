@@ -26,25 +26,29 @@
             font-weight: bold;
             color: #333;
             white-space: nowrap;
-            animation: move linear forwards;
+            animation: popUp 2s ease-in-out forwards;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 1000;
+            opacity: 0;
+            transform: scale(0.8);
         }
         
-        @keyframes move {
+        @keyframes popUp {
             0% {
-                transform: translateX(100vw);
                 opacity: 0;
+                transform: scale(0.5) translateY(20px);
             }
-            10% {
+            20% {
                 opacity: 1;
+                transform: scale(1.05) translateY(0);
             }
-            90% {
+            80% {
                 opacity: 1;
+                transform: scale(1);
             }
             100% {
-                transform: translateX(-100%);
                 opacity: 0;
+                transform: scale(0.8) translateY(-10px);
             }
         }
         
@@ -94,16 +98,18 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 随机位置（距离顶部）
-            const top = Math.random() * 85 + 5; // 5% - 90% 位置
+            // 随机位置
+            const left = Math.random() * 85 + 5; // 5% - 90% 水平位置
+            const top = Math.random() * 85 + 5;  // 5% - 90% 垂直位置
+            barrage.style.left = left + '%';
             barrage.style.top = top + '%';
             
-            // 随机速度
-            const duration = 8 + Math.random() * 7; // 8-15秒
+            // 更快的动画速度 (1-2秒)
+            const duration = 1 + Math.random() * 1; // 1-2秒
             barrage.style.animationDuration = duration + 's';
             
             // 随机动画延迟
-            barrage.style.animationDelay = (Math.random() * 5) + 's';
+            barrage.style.animationDelay = (Math.random() * 0.5) + 's';
             
             document.body.appendChild(barrage);
             
@@ -116,12 +122,12 @@
         // 启动弹幕
         function startBarrage() {
             // 初始创建一些弹幕
-            for(let i = 0; i < 8; i++) {
-                setTimeout(createBarrage, i * 800);
+            for(let i = 0; i < 10; i++) {
+                setTimeout(createBarrage, i * 30);
             }
             
-            // 持续创建新弹幕
-            setInterval(createBarrage, 1200);
+            // 持续创建新弹幕，频率更高
+            setInterval(createBarrage, 50); // 每0.5秒创建一个新弹幕
         }
         
         // 页面加载完成后启动
