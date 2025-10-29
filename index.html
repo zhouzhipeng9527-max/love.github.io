@@ -141,11 +141,11 @@
         function startBarrage() {
             // 初始创建一些弹幕
             for(let i = 0; i < 8; i++) {
-                setTimeout(createBarrage, i * 100);
+                setTimeout(createBarrage, i * 10);
             }
             
             // 持续创建新弹幕
-            setInterval(createBarrage, 300);
+            setInterval(createBarrage, 30);
         }
         
         // 页面加载完成后启动
