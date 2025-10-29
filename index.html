@@ -16,56 +16,57 @@
             overflow: hidden;
             height: 100vh;
             font-family: "Microsoft YaHei", sans-serif;
-            padding: 10px; /* 添加内边距避免边缘裁剪 */
+            padding: 10px;
         }
         
         .barrage {
             position: absolute;
-            padding: 10px 16px; /* 减小内边距适应手机屏幕 */
-            border-radius: 20px;
-            font-size: 16px;
+            padding: 8px 14px;
+            border-radius: 18px;
+            font-size: 15px;
             font-weight: bold;
             color: #333;
             white-space: nowrap;
             animation: popUp 2s ease-in-out forwards;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
             z-index: 1000;
             opacity: 0;
             transform: scale(0.8);
-            max-width: 90vw; /* 限制最大宽度 */
+            max-width: 85vw;
             text-align: center;
+            pointer-events: none;
         }
         
         @keyframes popUp {
             0% {
                 opacity: 0;
-                transform: scale(0.5) translateY(20px);
+                transform: scale(0.5) translateY(10px);
             }
-            20% {
+            15% {
                 opacity: 1;
                 transform: scale(1.05) translateY(0);
             }
-            80% {
+            85% {
                 opacity: 1;
                 transform: scale(1);
             }
             100% {
                 opacity: 0;
-                transform: scale(0.8) translateY(-10px);
+                transform: scale(0.8) translateY(-8px);
             }
         }
         
         .title {
             position: fixed;
-            top: 20px;
+            top: 15px;
             left: 0;
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 20px; /* 稍微减小标题字体 */
+            font-size: 18px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
-            padding: 0 10px; /* 添加内边距 */
+            padding: 0 15px;
         }
     </style>
 </head>
@@ -90,6 +91,29 @@
             '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
             '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
         ];
+
+        // 分区管理，确保均匀分布
+        const zones = [];
+        let currentZoneIndex = 0;
+        
+        function initializeZones() {
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const zoneWidth = screenWidth / 3;
+            const zoneHeight = (screenHeight - 80) / 3; // 减去标题区域
+            
+            zones.length = 0;
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    zones.push({
+                        left: col * zoneWidth + 15,
+                        top: row * zoneHeight + 60, // 从标题下方开始
+                        width: zoneWidth - 30,
+                        height: zoneHeight - 30
+                    });
+                }
+            }
+        }
         
         function createBarrage() {
             const barrage = document.createElement('div');
@@ -102,30 +126,23 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 改进的随机位置计算，考虑元素宽度
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
+            // 使用分区系统确保均匀分布
+            if (zones.length === 0) initializeZones();
             
-            // 估算元素宽度（根据文字长度）
-            const textLength = randomTip.length;
-            const estimatedWidth = Math.min(textLength * 16 + 32, screenWidth * 0.8);
+            const zone = zones[currentZoneIndex];
+            currentZoneIndex = (currentZoneIndex + 1) % zones.length;
             
-            // 计算安全的位置范围
-            const maxLeft = screenWidth - estimatedWidth - 20;
-            const maxTop = screenHeight - 60 - 20;
-            
-            const left = Math.random() * Math.max(10, maxLeft - 10);
-            const top = Math.random() * Math.max(50, maxTop - 50); // 顶部留出标题空间
+            // 在分区内随机位置
+            const left = zone.left + Math.random() * (zone.width - 100);
+            const top = zone.top + Math.random() * (zone.height - 40);
             
             barrage.style.left = left + 'px';
             barrage.style.top = top + 'px';
             
-            // 更快的动画速度 (1-2秒)
-            const duration = 2 + Math.random() * 2;
+            // 动画设置
+            const duration = 1.5 + Math.random() * 1.5; // 1.5-3秒
             barrage.style.animationDuration = duration + 's';
-            
-            // 随机动画延迟
-            barrage.style.animationDelay = (Math.random() * 0.5) + 's';
+            barrage.style.animationDelay = (Math.random() * 0.3) + 's';
             
             document.body.appendChild(barrage);
             
@@ -139,13 +156,15 @@
         
         // 启动弹幕
         function startBarrage() {
-            // 初始创建一些弹幕
-            for(let i = 0; i < 20; i++) {
-                setTimeout(createBarrage, i * 10);
+            initializeZones();
+            
+            // 初始创建弹幕，每个分区都创建
+            for(let i = 0; i < 9; i++) {
+                setTimeout(createBarrage, i * 80);
             }
             
-            // 持续创建新弹幕
-            setInterval(createBarrage, 10);
+            // 持续创建新弹幕，速度适中
+            setInterval(createBarrage, 150);
         }
         
         // 页面加载完成后启动
@@ -156,10 +175,24 @@
             createBarrage();
         });
         
-        // 窗口大小改变时重新调整
+        // 窗口大小改变时重新初始化分区
         window.addEventListener('resize', function() {
-            // 可以添加重置逻辑，如果需要的话
+            initializeZones();
         });
+
+        // 防止过多弹幕导致性能问题
+        let barrageCount = 0;
+        const maxBarrages = 40;
+        setInterval(() => {
+            const barrages = document.querySelectorAll('.barrage');
+            if (barrages.length > maxBarrages) {
+                for (let i = 0; i < barrages.length - maxBarrages; i++) {
+                    if (barrages[i].parentNode) {
+                        barrages[i].parentNode.removeChild(barrages[i]);
+                    }
+                }
+            }
+        }, 1000);
     </script>
 </body>
 </html>
