@@ -20,9 +20,9 @@
         
         .barrage {
             position: absolute;
-            padding: 6px 12px; /* 调小内边距 */
+            padding: 6px 12px; /* 减小内边距 */
             border-radius: 15px;
-            font-size: 10px; /* 调小字体 */
+            font-size: 14px; /* 减小字体大小 */
             font-weight: bold;
             color: #333;
             white-space: nowrap;
@@ -55,18 +55,16 @@
         
         .title {
             position: fixed;
-            top: 15px;
+            top: 10px; /* 更靠近顶部 */
             left: 0;
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 12px; /* 调小标题字体 */
+            font-size: 16px; /* 减小标题字体 */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
-            padding: 0 10px;
-            /* 添加固定定位，防止抖动 */
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
+            padding: 5px 10px; /* 减小内边距 */
+            line-height: 1.2; /* 紧凑行高 */
         }
     </style>
 </head>
@@ -106,16 +104,13 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 完全随机的位置分布，包括边缘和超出屏幕
+            // 完全随机的位置分布
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             
-            // 允许弹幕出现在屏幕外的一定范围内
-            const extendRange = 50; // 允许超出屏幕50px
-            
-            // 完全随机的位置，包括负值和超出屏幕的值
-            const left = Math.random() * (screenWidth + extendRange * 2) - extendRange;
-            const top = Math.random() * (screenHeight + extendRange * 2) - extendRange;
+            // 从标题下方开始，避免重叠
+            const left = Math.random() * (screenWidth - 100);
+            const top = 40 + Math.random() * (screenHeight - 80); // 从标题下方40px开始
             
             barrage.style.left = left + 'px';
             barrage.style.top = top + 'px';
@@ -154,11 +149,6 @@
         // 点击屏幕也可以创建弹幕
         document.body.addEventListener('click', function(e) {
             createBarrage();
-        });
-        
-        // 窗口大小改变时重新调整
-        window.addEventListener('resize', function() {
-            // 可以添加重置逻辑，如果需要的话
         });
     </script>
 </body>
