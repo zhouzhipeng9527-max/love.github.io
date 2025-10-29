@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>温馨弹幕祝福</title>
+    <title>💕</title>
     <style>
         * {
             margin: 0;
@@ -16,12 +16,13 @@
             overflow: hidden;
             height: 100vh;
             font-family: "Microsoft YaHei", sans-serif;
+            padding: 10px; /* 添加内边距避免边缘裁剪 */
         }
         
         .barrage {
             position: absolute;
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 10px 16px; /* 减小内边距适应手机屏幕 */
+            border-radius: 20px;
             font-size: 16px;
             font-weight: bold;
             color: #333;
@@ -31,6 +32,8 @@
             z-index: 1000;
             opacity: 0;
             transform: scale(0.8);
+            max-width: 90vw; /* 限制最大宽度 */
+            text-align: center;
         }
         
         @keyframes popUp {
@@ -59,14 +62,15 @@
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 24px;
+            font-size: 20px; /* 稍微减小标题字体 */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
+            padding: 0 10px; /* 添加内边距 */
         }
     </style>
 </head>
 <body>
-    <div class="title">💕 温馨祝福弹幕 💕</div>
+    <div class="title">💕代码在重复，思念在循环💕</div>
     
     <script>
         // 祝福语数组
@@ -98,14 +102,26 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 随机位置
-            const left = Math.random() * 85 + 5; // 5% - 90% 水平位置
-            const top = Math.random() * 85 + 5;  // 5% - 90% 垂直位置
-            barrage.style.left = left + '%';
-            barrage.style.top = top + '%';
+            // 改进的随机位置计算，考虑元素宽度
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            // 估算元素宽度（根据文字长度）
+            const textLength = randomTip.length;
+            const estimatedWidth = Math.min(textLength * 16 + 32, screenWidth * 0.8);
+            
+            // 计算安全的位置范围
+            const maxLeft = screenWidth - estimatedWidth - 20;
+            const maxTop = screenHeight - 60 - 20;
+            
+            const left = Math.random() * Math.max(10, maxLeft - 10);
+            const top = Math.random() * Math.max(50, maxTop - 50); // 顶部留出标题空间
+            
+            barrage.style.left = left + 'px';
+            barrage.style.top = top + 'px';
             
             // 更快的动画速度 (1-2秒)
-            const duration = 1 + Math.random() * 1; // 1-2秒
+            const duration = 1 + Math.random() * 1;
             barrage.style.animationDuration = duration + 's';
             
             // 随机动画延迟
@@ -115,19 +131,21 @@
             
             // 动画结束后移除元素
             barrage.addEventListener('animationend', function() {
-                barrage.remove();
+                if (barrage.parentNode) {
+                    barrage.parentNode.removeChild(barrage);
+                }
             });
         }
         
         // 启动弹幕
         function startBarrage() {
             // 初始创建一些弹幕
-            for(let i = 0; i < 10; i++) {
-                setTimeout(createBarrage, i * 30);
+            for(let i = 0; i < 8; i++) {
+                setTimeout(createBarrage, i * 100);
             }
             
-            // 持续创建新弹幕，频率更高
-            setInterval(createBarrage, 50); // 每0.5秒创建一个新弹幕
+            // 持续创建新弹幕
+            setInterval(createBarrage, 300);
         }
         
         // 页面加载完成后启动
@@ -136,6 +154,11 @@
         // 点击屏幕也可以创建弹幕
         document.body.addEventListener('click', function(e) {
             createBarrage();
+        });
+        
+        // 窗口大小改变时重新调整
+        window.addEventListener('resize', function() {
+            // 可以添加重置逻辑，如果需要的话
         });
     </script>
 </body>
