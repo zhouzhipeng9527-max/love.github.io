@@ -16,22 +16,24 @@
             overflow: hidden;
             height: 100vh;
             font-family: "Microsoft YaHei", sans-serif;
+            padding: 10px;
         }
         
         .barrage {
             position: absolute;
-            padding: 6px 12px; /* 减小内边距 */
-            border-radius: 15px;
-            font-size: 14px; /* 减小字体大小 */
+            padding: 6px 10px;
+            border-radius: 16px;
+            font-size: 12px; /* 字体更小以扩大视觉空间 */
             font-weight: bold;
             color: #333;
             white-space: nowrap;
             animation: popUp 2s ease-in-out forwards;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
             z-index: 1000;
             opacity: 0;
             transform: scale(0.8);
-            box-shadow: none;
-            background-color: rgba(255, 255, 255, 0.9);
+            max-width: 90vw;
+            text-align: center;
         }
         
         @keyframes popUp {
@@ -55,16 +57,15 @@
         
         .title {
             position: fixed;
-            top: 10px; /* 更靠近顶部 */
+            top: 20px;
             left: 0;
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 16px; /* 减小标题字体 */
+            font-size: 18px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
-            padding: 5px 10px; /* 减小内边距 */
-            line-height: 1.2; /* 紧凑行高 */
+            padding: 0 10px;
         }
     </style>
 </head>
@@ -72,7 +73,6 @@
     <div class="title">💕代码在重复，思念在循环💕</div>
     
     <script>
-        // 祝福语数组
         const tips = [
             '💧 多喝水哦~', '😊 保持微笑呀', '✨ 每天都要元气满满',
             '🍎 记得吃水果', '🌞 保持好心情', '❤️ 好好爱自己', 
@@ -83,73 +83,52 @@
             '🌸 春暖花开', '🎵 天天好心情', '🚀 前程似锦'
         ];
         
-        // 颜色数组 - 使用半透明颜色
         const colors = [
-            'rgba(255, 182, 193, 0.9)', 'rgba(135, 206, 235, 0.9)', 
-            'rgba(144, 238, 144, 0.9)', 'rgba(230, 230, 250, 0.9)',
-            'rgba(255, 255, 224, 0.9)', 'rgba(221, 160, 221, 0.9)', 
-            'rgba(255, 127, 80, 0.9)', 'rgba(255, 228, 196, 0.9)',
-            'rgba(127, 255, 212, 0.9)', 'rgba(255, 228, 225, 0.9)', 
-            'rgba(240, 255, 240, 0.9)', 'rgba(255, 240, 245, 0.9)'
+            '#FFB6C1', '#87CEEB', '#90EE90', '#E6E6FA',
+            '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
+            '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
         ];
         
         function createBarrage() {
             const barrage = document.createElement('div');
             barrage.className = 'barrage';
             
-            // 随机选择祝福语和颜色
             const randomTip = tips[Math.floor(Math.random() * tips.length)];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 完全随机的位置分布
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             
-            // 从标题下方开始，避免重叠
-            const left = Math.random() * (screenWidth - 100);
-            const top = 40 + Math.random() * (screenHeight - 80); // 从标题下方40px开始
+            // 允许弹幕超出边界一点 (-10% ~ +10%)
+            const left = (Math.random() * 1.2 - 0.1) * screenWidth;
+            const top = (Math.random() * 1.2 - 0.1) * screenHeight;
             
             barrage.style.left = left + 'px';
             barrage.style.top = top + 'px';
             
-            // 保持原有的速度设置
             const duration = 2 + Math.random() * 2;
             barrage.style.animationDuration = duration + 's';
-            
-            // 随机动画延迟
             barrage.style.animationDelay = (Math.random() * 0.5) + 's';
             
             document.body.appendChild(barrage);
             
-            // 动画结束后移除元素
             barrage.addEventListener('animationend', function() {
-                if (barrage.parentNode) {
-                    barrage.parentNode.removeChild(barrage);
-                }
+                barrage.remove();
             });
         }
         
-        // 启动弹幕 - 保持原有的速度设置
         function startBarrage() {
-            // 初始创建一些弹幕
             for(let i = 0; i < 20; i++) {
                 setTimeout(createBarrage, i * 10);
             }
-            
-            // 持续创建新弹幕
             setInterval(createBarrage, 10);
         }
         
-        // 页面加载完成后启动
         window.onload = startBarrage;
-        
-        // 点击屏幕也可以创建弹幕
-        document.body.addEventListener('click', function(e) {
-            createBarrage();
-        });
+        document.body.addEventListener('click', createBarrage);
     </script>
 </body>
 </html>
