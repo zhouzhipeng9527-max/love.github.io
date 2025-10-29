@@ -16,24 +16,24 @@
             overflow: hidden;
             height: 100vh;
             font-family: "Microsoft YaHei", sans-serif;
-            padding: 10px; /* 添加内边距避免边缘裁剪 */
         }
         
         .barrage {
             position: absolute;
-            padding: 10px 16px; /* 减小内边距适应手机屏幕 */
-            border-radius: 20px;
+            padding: 8px 14px;
+            border-radius: 18px;
             font-size: 16px;
             font-weight: bold;
             color: #333;
             white-space: nowrap;
             animation: popUp 2s ease-in-out forwards;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             z-index: 1000;
             opacity: 0;
             transform: scale(0.8);
-            max-width: 90vw; /* 限制最大宽度 */
-            text-align: center;
+            /* 去掉边框阴影 */
+            box-shadow: none;
+            /* 添加半透明背景 */
+            background-color: rgba(255, 255, 255, 0.9);
         }
         
         @keyframes popUp {
@@ -62,10 +62,10 @@
             width: 100%;
             text-align: center;
             color: white;
-            font-size: 20px; /* 稍微减小标题字体 */
+            font-size: 20px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 999;
-            padding: 0 10px; /* 添加内边距 */
+            padding: 0 10px;
         }
     </style>
 </head>
@@ -84,11 +84,14 @@
             '🌸 春暖花开', '🎵 天天好心情', '🚀 前程似锦'
         ];
         
-        // 颜色数组
+        // 颜色数组 - 使用半透明颜色
         const colors = [
-            '#FFB6C1', '#87CEEB', '#90EE90', '#E6E6FA',
-            '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
-            '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
+            'rgba(255, 182, 193, 0.9)', 'rgba(135, 206, 235, 0.9)', 
+            'rgba(144, 238, 144, 0.9)', 'rgba(230, 230, 250, 0.9)',
+            'rgba(255, 255, 224, 0.9)', 'rgba(221, 160, 221, 0.9)', 
+            'rgba(255, 127, 80, 0.9)', 'rgba(255, 228, 196, 0.9)',
+            'rgba(127, 255, 212, 0.9)', 'rgba(255, 228, 225, 0.9)', 
+            'rgba(240, 255, 240, 0.9)', 'rgba(255, 240, 245, 0.9)'
         ];
         
         function createBarrage() {
@@ -102,26 +105,30 @@
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
             
-            // 改进的随机位置计算，考虑元素宽度
+            // 改进的位置分布算法
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
             
-            // 估算元素宽度（根据文字长度）
-            const textLength = randomTip.length;
-            const estimatedWidth = Math.min(textLength * 16 + 32, screenWidth * 0.8);
+            // 将屏幕划分为网格，确保均匀分布
+            const gridCols = 4; // 水平方向4列
+            const gridRows = 6; // 垂直方向6行
             
-            // 计算安全的位置范围
-            const maxLeft = screenWidth - estimatedWidth - 20;
-            const maxTop = screenHeight - 60 - 20;
+            const col = Math.floor(Math.random() * gridCols);
+            const row = Math.floor(Math.random() * gridRows);
             
-            const left = Math.random() * Math.max(10, maxLeft - 10);
-            const top = Math.random() * Math.max(50, maxTop - 50); // 顶部留出标题空间
+            // 计算网格单元大小
+            const cellWidth = screenWidth / gridCols;
+            const cellHeight = (screenHeight - 100) / gridRows; // 减去标题区域
             
-            barrage.style.left = left + 'px';
-            barrage.style.top = top + 'px';
+            // 在网格单元内随机位置
+            const left = col * cellWidth + Math.random() * (cellWidth - 100);
+            const top = 60 + row * cellHeight + Math.random() * (cellHeight - 40); // 从标题下方开始
             
-            // 更快的动画速度 (1-2秒)
-            const duration = 1 + Math.random() * 1;
+            barrage.style.left = Math.max(10, Math.min(left, screenWidth - 150)) + 'px';
+            barrage.style.top = Math.max(60, Math.min(top, screenHeight - 60)) + 'px';
+            
+            // 保持原有的速度设置
+            const duration = 2 + Math.random() * 2;
             barrage.style.animationDuration = duration + 's';
             
             // 随机动画延迟
@@ -137,15 +144,15 @@
             });
         }
         
-        // 启动弹幕
+        // 启动弹幕 - 保持原有的速度设置
         function startBarrage() {
             // 初始创建一些弹幕
             for(let i = 0; i < 20; i++) {
-                setTimeout(createBarrage, i * 30);
+                setTimeout(createBarrage, i * 10);
             }
             
             // 持续创建新弹幕
-            setInterval(createBarrage, 30);
+            setInterval(createBarrage, 10);
         }
         
         // 页面加载完成后启动
