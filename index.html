@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温馨弹幕祝福</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        
+        .barrage {
+            position: absolute;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+            animation: move linear forwards;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        @keyframes move {
+            0% {
+                transform: translateX(100vw);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+        }
+        
+        .title {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">💕 温馨祝福弹幕 💕</div>
+    
+    <script>
+        // 祝福语数组
+        const tips = [
+            '💧 多喝水哦~', '😊 保持微笑呀', '✨ 每天都要元气满满',
+            '🍎 记得吃水果', '🌞 保持好心情', '❤️ 好好爱自己', 
+            '🤗 我想你了', '🌟 梦想成真', '📚 金榜题名', 
+            '🛌 早点休息', '🍀 愿所有烦恼都消失', '🌙 别熬夜',
+            '😄 今天过得开心嘛', '🧥 天冷了，多穿衣服',
+            '🎉 恭喜发财', '🌈 好运连连', '🎯 心想事成',
+            '🌸 春暖花开', '🎵 天天好心情', '🚀 前程似锦'
+        ];
+        
+        // 颜色数组
+        const colors = [
+            '#FFB6C1', '#87CEEB', '#90EE90', '#E6E6FA',
+            '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
+            '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
+        ];
+        
+        function createBarrage() {
+            const barrage = document.createElement('div');
+            barrage.className = 'barrage';
+            
+            // 随机选择祝福语和颜色
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            barrage.textContent = randomTip;
+            barrage.style.backgroundColor = randomColor;
+            
+            // 随机位置（距离顶部）
+            const top = Math.random() * 85 + 5; // 5% - 90% 位置
+            barrage.style.top = top + '%';
+            
+            // 随机速度
+            const duration = 8 + Math.random() * 7; // 8-15秒
+            barrage.style.animationDuration = duration + 's';
+            
+            // 随机动画延迟
+            barrage.style.animationDelay = (Math.random() * 5) + 's';
+            
+            document.body.appendChild(barrage);
+            
+            // 动画结束后移除元素
+            barrage.addEventListener('animationend', function() {
+                barrage.remove();
+            });
+        }
+        
+        // 启动弹幕
+        function startBarrage() {
+            // 初始创建一些弹幕
+            for(let i = 0; i < 8; i++) {
+                setTimeout(createBarrage, i * 800);
+            }
+            
+            // 持续创建新弹幕
+            setInterval(createBarrage, 1200);
+        }
+        
+        // 页面加载完成后启动
+        window.onload = startBarrage;
+        
+        // 点击屏幕也可以创建弹幕
+        document.body.addEventListener('click', function(e) {
+            createBarrage();
+        });
+    </script>
+</body>
+</html>
