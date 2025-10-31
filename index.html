@@ -26,9 +26,6 @@
         z-index: 1000;
         opacity: 0;
         transform: scale(0.8);
-        max-width: 90vw;
-        text-align: center;
-        transition: all 2s ease;
     }
 
     @keyframes popUp {
@@ -49,8 +46,10 @@
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         z-index: 999;
         pointer-events: none;
+        transition: opacity 2s ease;
     }
 
+    /* 弹窗 */
     .popup {
         position: fixed;
         top: 50%;
@@ -79,15 +78,15 @@
     }
     .popup button:hover { transform: scale(1.05); }
 
-    /* 刮刮卡区域 */
+    /* 局部刮刮区域 */
     #mask {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 320px;
-        height: 200px;
-        background: transparent;
+        height: 220px;
+        background: rgba(0,0,0,0.8);
         border-radius: 20px;
         box-shadow: 0 5px 25px rgba(0,0,0,0.3);
         z-index: 3000;
@@ -103,7 +102,7 @@
         color: #fff;
         font-size: 22px;
         text-align: center;
-        opacity: 0; /* 初始隐藏 */
+        opacity: 0; /* 修复：初始完全不可见 */
         user-select: none;
         transition: opacity 1s ease;
         z-index: 10;
@@ -117,22 +116,23 @@
         border-radius: 20px;
     }
 
-    /* 弹幕变气球动画 */
-    .floatBalloon {
-        animation: flyUp 4s ease-in forwards;
-        border-radius: 50%;
-        transform: scale(1.2);
+    /* 爱心粒子 */
+    .heart {
+        position: fixed;
+        font-size: 16px;
+        animation: floatUp 4s ease-out forwards;
+        pointer-events: none;
+        z-index: 5000;
     }
 
-    @keyframes flyUp {
-        0% { transform: translateY(0) scale(1.2); opacity: 1; }
-        100% { transform: translateY(-200px) scale(1.8); opacity: 0; }
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 1; }
+        100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
     }
-
 </style>
 </head>
 <body>
-    <div class="title">💕代码在重复，思念在循环💕</div>
+    <div class="title" id="titleText">💕代码在重复，思念在循环💕</div>
 
     <!-- 弹窗 -->
     <div class="popup" id="popup">
@@ -140,7 +140,7 @@
         <button id="continueBtn">继续看看</button>
     </div>
 
-    <!-- 刮刮卡区域 -->
+    <!-- 局部刮刮卡 -->
     <div id="mask">
         <div id="revealText">其实……我一直在这里等你 💖</div>
         <canvas id="scratchCanvas"></canvas>
@@ -162,6 +162,8 @@
             '#FF7F50','#FFE4C4','#7FFFD4','#FFE4E1','#F0FFF0','#FFF0F5'
         ];
 
+        let barrageInterval;
+
         function createBarrage() {
             const barrage = document.createElement('div');
             barrage.className = 'barrage';
@@ -180,7 +182,17 @@
 
         function startBarrage() {
             for (let i = 0; i < 20; i++) setTimeout(createBarrage, i * 10);
-            setInterval(createBarrage, 10);
+            barrageInterval = setInterval(createBarrage, 10);
+        }
+
+        function stopBarrage() {
+            clearInterval(barrageInterval);
+            document.querySelectorAll('.barrage').forEach(b => {
+                b.style.transition = 'opacity 2s';
+                b.style.opacity = '0';
+                setTimeout(() => b.remove(), 2000);
+            });
+            document.getElementById('titleText').style.opacity = 0;
         }
 
         window.onload = startBarrage;
@@ -198,7 +210,7 @@
             showScratchLayer();
         });
 
-        // 显示刮刮卡
+        // 显示刮刮区域
         function showScratchLayer() {
             const mask = document.getElementById('mask');
             const canvas = document.getElementById('scratchCanvas');
@@ -207,14 +219,27 @@
             canvas.width = mask.clientWidth;
             canvas.height = mask.clientHeight;
 
-            // 绘制灰色遮罩层（完全遮住文字）
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillStyle = '#555';
+            ctx.fillStyle = '#777';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let isDrawing = false;
             const revealText = document.getElementById('revealText');
             const scratchRadius = 30;
+
+            // 检测刮除比例
+            function checkReveal() {
+                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let cleared = 0;
+                for (let i = 3; i < imgData.data.length; i += 4) {
+                    if (imgData.data[i] < 128) cleared++;
+                }
+                const percent = cleared / (canvas.width * canvas.height);
+                if (percent > 0.5) { // 刮开超过50%
+                    revealText.style.opacity = 1;
+                    stopBarrage(); // 淡出弹幕
+                    startHeartFlow(); // 爱心漂浮
+                }
+            }
 
             function draw(e) {
                 if (!isDrawing) return;
@@ -225,21 +250,7 @@
                 ctx.beginPath();
                 ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
                 ctx.fill();
-
                 checkReveal();
-            }
-
-            function checkReveal() {
-                const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                let cleared = 0;
-                for (let i = 3; i < imgData.data.length; i += 4) {
-                    if (imgData.data[i] < 128) cleared++;
-                }
-                const percent = cleared / (canvas.width * canvas.height);
-                if (percent > 0.5) { // 当刮开50%以上时触发
-                    revealText.style.opacity = 1;
-                    setTimeout(makeBalloonsFly, 1000);
-                }
             }
 
             canvas.addEventListener('mousedown', () => isDrawing = true);
@@ -251,14 +262,18 @@
             canvas.addEventListener('touchmove', draw);
         }
 
-        // 刮开后弹幕变气球飞走
-        function makeBalloonsFly() {
-            const barrages = document.querySelectorAll('.barrage');
-            barrages.forEach(b => {
-                b.classList.add('floatBalloon');
-                b.style.transition = 'transform 3s ease, opacity 3s ease';
-                setTimeout(() => b.remove(), 4000);
-            });
+        // 爱心飘散逻辑
+        function startHeartFlow() {
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.textContent = '💖';
+                heart.style.left = 40 + Math.random() * 20 + 'vw';
+                heart.style.top = 60 + Math.random() * 20 + 'vh';
+                heart.style.fontSize = 14 + Math.random() * 10 + 'px';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 4000);
+            }, 300);
         }
     </script>
 </body>
