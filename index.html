@@ -119,11 +119,6 @@
         background: rgba(0, 0, 0, 0.8);
         z-index: 3000;
         display: none;
-        cursor: grab;
-    }
-
-    .cover-layer:active {
-        cursor: grabbing;
     }
 
     .hidden-message {
@@ -139,13 +134,14 @@
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
 
-    .scratch-area {
+    /* 刮刮乐画布样式 */
+    #scratchCanvas {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: transparent;
+        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2"/></svg>') 12 12, auto;
     }
 </style>
 </head>
@@ -161,7 +157,7 @@
 
     <!-- 掩盖层 -->
     <div class="cover-layer" id="coverLayer">
-        <div class="scratch-area" id="scratchArea"></div>
+        <canvas id="scratchCanvas"></canvas>
     </div>
 
     <!-- 隐藏的信息 -->
@@ -186,10 +182,6 @@
             '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
             '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
         ];
-
-        let scratchedArea = 0;
-        const totalArea = window.innerWidth * window.innerHeight;
-        const scratchRadius = 30;
 
         function createBarrage() {
             const barrage = document.createElement('div');
@@ -226,10 +218,14 @@
             setInterval(createBarrage, 10);
         }
 
-        // 10秒后显示弹窗
-        setTimeout(() => {
-            document.getElementById('popup').style.display = 'block';
-        }, 10000);
+        // 显示弹窗的函数
+        function showPopup() {
+            console.log('显示弹窗'); // 调试用
+            const popup = document.getElementById('popup');
+            if (popup) {
+                popup.style.display = 'block';
+            }
+        }
 
         function showCoverLayer() {
             document.getElementById('popup').style.display = 'none';
@@ -239,20 +235,12 @@
         }
 
         function setupScratchEffect() {
-            const scratchArea = document.getElementById('scratchArea');
-            const canvas = document.createElement('canvas');
+            const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
             
+            // 设置画布尺寸
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            // 设置画布样式
-            canvas.style.position = 'absolute';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            canvas.style.cursor = 'url(\'data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"none\" stroke=\"white\" stroke-width=\"2\"/></svg>\') 12 12, auto';
             
             // 初始填充黑色
             ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
@@ -260,6 +248,7 @@
             ctx.globalCompositeOperation = 'destination-out';
             
             let isDrawing = false;
+            const scratchRadius = 30;
             
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('touchstart', startDrawing);
@@ -296,7 +285,7 @@
                 ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // 检查擦除面积
+                // 检查擦除进度
                 checkScratchProgress();
             }
             
@@ -305,23 +294,39 @@
             }
             
             function checkScratchProgress() {
-                // 简单的进度检查：当擦除面积达到30%时显示完整信息
-                scratchedArea += Math.PI * scratchRadius * scratchRadius;
-                const progress = scratchedArea / totalArea;
+                // 简单的进度检查
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                let transparentPixels = 0;
+                
+                for (let i = 3; i < pixels.length; i += 4) {
+                    if (pixels[i] === 0) {
+                        transparentPixels++;
+                    }
+                }
+                
+                const progress = transparentPixels / (pixels.length / 4);
                 
                 if (progress > 0.3) {
                     // 完全显示隐藏信息
                     canvas.style.opacity = '0';
                     setTimeout(() => {
-                        canvas.remove();
+                        canvas.style.display = 'none';
                     }, 500);
                 }
             }
-            
-            scratchArea.appendChild(canvas);
         }
 
-        window.onload = startBarrage;
+        // 页面加载完成后启动所有功能
+        window.onload = function() {
+            startBarrage();
+            
+            // 10秒后显示弹窗
+            setTimeout(() => {
+                showPopup();
+            }, 10000);
+        };
+
         document.body.addEventListener('click', createBarrage);
     </script>
 </body>
