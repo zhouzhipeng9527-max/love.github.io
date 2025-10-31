@@ -71,10 +71,104 @@
         z-index: 999;
         pointer-events: none;
     }
+
+    /* 弹窗样式 */
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        text-align: center;
+        z-index: 2000;
+        display: none;
+    }
+
+    .popup h2 {
+        color: #ff6b6b;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .continue-btn {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 10px;
+        transition: transform 0.3s;
+    }
+
+    .continue-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* 掩盖层样式 */
+    .cover-layer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 3000;
+        display: none;
+        cursor: grab;
+    }
+
+    .cover-layer:active {
+        cursor: grabbing;
+    }
+
+    .hidden-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 32px;
+        text-align: center;
+        z-index: 2500;
+        display: none;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .scratch-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+    }
 </style>
 </head>
 <body>
     <div class="title">💕代码在重复，思念在循环💕</div>
+
+    <!-- 弹窗 -->
+    <div class="popup" id="popup">
+        <h2>💝 别着急离开 💝</h2>
+        <p>还有更多惊喜等着你...</p>
+        <button class="continue-btn" onclick="showCoverLayer()">继续探索</button>
+    </div>
+
+    <!-- 掩盖层 -->
+    <div class="cover-layer" id="coverLayer">
+        <div class="scratch-area" id="scratchArea"></div>
+    </div>
+
+    <!-- 隐藏的信息 -->
+    <div class="hidden-message" id="hiddenMessage">
+        💕 我永远爱你 💕<br>
+        <span style="font-size: 18px; margin-top: 10px; display: block;">愿我们的故事永远继续...</span>
+    </div>
 
     <script>
         const tips = [
@@ -93,6 +187,10 @@
             '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
         ];
 
+        let scratchedArea = 0;
+        const totalArea = window.innerWidth * window.innerHeight;
+        const scratchRadius = 30;
+
         function createBarrage() {
             const barrage = document.createElement('div');
             barrage.className = 'barrage';
@@ -106,7 +204,6 @@
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
 
-            // 限制在 0%~100% 范围，但允许轻微偏移（±5%）
             const left = (Math.random() * 1.1 - 0.05) * screenWidth;
             const top = (Math.random() * 1.1 - 0.05) * screenHeight;
 
@@ -127,6 +224,101 @@
                 setTimeout(createBarrage, i * 10);
             }
             setInterval(createBarrage, 10);
+        }
+
+        // 10秒后显示弹窗
+        setTimeout(() => {
+            document.getElementById('popup').style.display = 'block';
+        }, 10000);
+
+        function showCoverLayer() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('coverLayer').style.display = 'block';
+            document.getElementById('hiddenMessage').style.display = 'block';
+            setupScratchEffect();
+        }
+
+        function setupScratchEffect() {
+            const scratchArea = document.getElementById('scratchArea');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // 设置画布样式
+            canvas.style.position = 'absolute';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.cursor = 'url(\'data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"none\" stroke=\"white\" stroke-width=\"2\"/></svg>\') 12 12, auto';
+            
+            // 初始填充黑色
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out';
+            
+            let isDrawing = false;
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', startDrawing);
+            
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', draw);
+            
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                draw(e);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                e.preventDefault();
+                
+                const rect = canvas.getBoundingClientRect();
+                let x, y;
+                
+                if (e.type.includes('touch')) {
+                    x = e.touches[0].clientX - rect.left;
+                    y = e.touches[0].clientY - rect.top;
+                } else {
+                    x = e.clientX - rect.left;
+                    y = e.clientY - rect.top;
+                }
+                
+                // 绘制圆形擦除区域
+                ctx.beginPath();
+                ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 检查擦除面积
+                checkScratchProgress();
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            function checkScratchProgress() {
+                // 简单的进度检查：当擦除面积达到30%时显示完整信息
+                scratchedArea += Math.PI * scratchRadius * scratchRadius;
+                const progress = scratchedArea / totalArea;
+                
+                if (progress > 0.3) {
+                    // 完全显示隐藏信息
+                    canvas.style.opacity = '0';
+                    setTimeout(() => {
+                        canvas.remove();
+                    }, 500);
+                }
+            }
+            
+            scratchArea.appendChild(canvas);
         }
 
         window.onload = startBarrage;
