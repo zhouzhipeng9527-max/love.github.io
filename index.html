@@ -5,18 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💕1</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    html, body {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; }
     body {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         font-family: "Microsoft YaHei", sans-serif;
@@ -41,22 +31,10 @@
     }
 
     @keyframes popUp {
-        0% {
-            opacity: 0;
-            transform: scale(0.5) translateY(20px);
-        }
-        20% {
-            opacity: 1;
-            transform: scale(1.05) translateY(0);
-        }
-        80% {
-            opacity: 1;
-            transform: scale(1);
-        }
-        100% {
-            opacity: 0;
-            transform: scale(0.8) translateY(-10px);
-        }
+        0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+        20% { opacity: 1; transform: scale(1.05) translateY(0); }
+        80% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.8) translateY(-10px); }
     }
 
     .title {
@@ -87,14 +65,8 @@
         opacity: 0;
         transition: all 0.6s ease;
     }
-    .popup.show {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-    .popup h2 {
-        color: #764ba2;
-        margin-bottom: 10px;
-    }
+    .popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .popup h2 { color: #764ba2; margin-bottom: 10px; }
     .popup button {
         background: linear-gradient(135deg, #667eea, #764ba2);
         border: none;
@@ -105,18 +77,19 @@
         cursor: pointer;
         transition: 0.3s;
     }
-    .popup button:hover {
-        transform: scale(1.05);
-    }
+    .popup button:hover { transform: scale(1.05); }
 
-    /* 刮刮层 */
+    /* 改为局部刮刮区域 */
     #mask {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 200px;
         background: rgba(0,0,0,0.8);
+        border-radius: 20px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.3);
         z-index: 3000;
         display: none;
         overflow: hidden;
@@ -133,12 +106,27 @@
         opacity: 0.1;
         user-select: none;
         transition: opacity 1s ease;
+        z-index: 10;
+        width: 100%;
     }
 
     canvas {
         position: absolute;
         top: 0;
         left: 0;
+        border-radius: 20px;
+    }
+
+    /* 爱心粒子 */
+    .heart {
+        position: fixed;
+        font-size: 16px;
+        animation: floatUp 3s linear forwards;
+        pointer-events: none;
+    }
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 1; }
+        100% { transform: translateY(-150px) scale(1.5); opacity: 0; }
     }
 </style>
 </head>
@@ -151,7 +139,7 @@
         <button id="continueBtn">继续看看</button>
     </div>
 
-    <!-- 遮罩层 -->
+    <!-- 局部刮刮卡 -->
     <div id="mask">
         <div id="revealText">其实……我一直在这里等你 💖</div>
         <canvas id="scratchCanvas"></canvas>
@@ -159,19 +147,18 @@
 
     <script>
         const tips = [
-            '💧 多喝水哦~', '😊 保持微笑呀', '✨ 每天都要元气满满',
-            '🍎 记得吃水果', '🌞 保持好心情', '❤️ 好好爱自己', 
-            '🤗 我想你了', '🌟 梦想成真', '📚 金榜题名', 
-            '🛌 早点休息', '🍀 愿所有烦恼都消失', '🌙 别熬夜',
-            '😄 今天过得开心嘛', '🧥 天冷了，多穿衣服',
-            '🎉 恭喜发财', '🌈 好运连连', '🎯 心想事成',
-            '🌸 春暖花开', '🎵 天天好心情', '🚀 前程似锦'
+            '💧 多喝水哦~','😊 保持微笑呀','✨ 每天都要元气满满',
+            '🍎 记得吃水果','🌞 保持好心情','❤️ 好好爱自己',
+            '🤗 我想你了','🌟 梦想成真','📚 金榜题名',
+            '🛌 早点休息','🍀 愿所有烦恼都消失','🌙 别熬夜',
+            '😄 今天过得开心嘛','🧥 天冷了，多穿衣服',
+            '🎉 恭喜发财','🌈 好运连连','🎯 心想事成',
+            '🌸 春暖花开','🎵 天天好心情','🚀 前程似锦'
         ];
 
         const colors = [
-            '#FFB6C1', '#87CEEB', '#90EE90', '#E6E6FA',
-            '#FFFFE0', '#DDA0DD', '#FF7F50', '#FFE4C4',
-            '#7FFFD4', '#FFE4E1', '#F0FFF0', '#FFF0F5'
+            '#FFB6C1','#87CEEB','#90EE90','#E6E6FA','#FFFFE0','#DDA0DD',
+            '#FF7F50','#FFE4C4','#7FFFD4','#FFE4E1','#F0FFF0','#FFF0F5'
         ];
 
         function createBarrage() {
@@ -183,32 +170,26 @@
             barrage.style.backgroundColor = randomColor;
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
-            const left = (Math.random() * 1.1 - 0.05) * screenWidth;
-            const top = (Math.random() * 1.1 - 0.05) * screenHeight;
-            barrage.style.left = left + 'px';
-            barrage.style.top = top + 'px';
-            const duration = 2 + Math.random() * 2;
-            barrage.style.animationDuration = duration + 's';
-            barrage.style.animationDelay = (Math.random() * 0.5) + 's';
+            barrage.style.left = Math.random() * screenWidth + 'px';
+            barrage.style.top = Math.random() * screenHeight + 'px';
+            barrage.style.animationDuration = (2 + Math.random() * 2) + 's';
             document.body.appendChild(barrage);
             barrage.addEventListener('animationend', () => barrage.remove());
         }
 
         function startBarrage() {
-            for (let i = 0; i < 20; i++) {
-                setTimeout(createBarrage, i * 10);
-            }
+            for (let i = 0; i < 20; i++) setTimeout(createBarrage, i * 10);
             setInterval(createBarrage, 10);
         }
+
         window.onload = startBarrage;
         document.body.addEventListener('click', createBarrage);
 
-        // 10 秒后出现弹窗
+        // 10秒后出现弹窗
         setTimeout(() => {
             document.getElementById('popup').classList.add('show');
         }, 10000);
 
-        // 点击继续按钮
         document.getElementById('continueBtn').addEventListener('click', () => {
             const popup = document.getElementById('popup');
             popup.style.opacity = '0';
@@ -216,27 +197,27 @@
             showScratchLayer();
         });
 
-        // 显示刮刮层
+        // 显示刮刮区域
         function showScratchLayer() {
             const mask = document.getElementById('mask');
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
             mask.style.display = 'block';
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = mask.clientWidth;
+            canvas.height = mask.clientHeight;
 
-            // 绘制灰色遮罩层
-            ctx.fillStyle = '#444';
+            ctx.fillStyle = '#666';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             let isDrawing = false;
             const revealText = document.getElementById('revealText');
-            const scratchRadius = 40;
+            const scratchRadius = 30;
 
             function draw(e) {
                 if (!isDrawing) return;
-                const x = (e.touches ? e.touches[0].clientX : e.clientX);
-                const y = (e.touches ? e.touches[0].clientY : e.clientY);
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
@@ -251,10 +232,23 @@
             canvas.addEventListener('touchend', () => isDrawing = false);
             canvas.addEventListener('touchmove', draw);
 
-            // 一段时间后自动显露全部
+            // 一段时间后自动显露文字 + 爱心动画
             setTimeout(() => {
                 revealText.style.opacity = 1;
+                setInterval(createHeart, 200);
             }, 3000);
+        }
+
+        // 爱心飘散
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '💖';
+            heart.style.left = 50 + Math.random() * 40 + 'vw';
+            heart.style.top = 60 + Math.random() * 20 + 'vh';
+            heart.style.fontSize = 14 + Math.random() * 10 + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 3000);
         }
     </script>
 </body>
