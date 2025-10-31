@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💕</title>
+<title>💕1</title>
 <style>
     * {
         margin: 0;
@@ -72,76 +72,73 @@
         pointer-events: none;
     }
 
-    /* 弹窗样式 */
+    /* 弹窗 */
     .popup {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255, 255, 255, 0.95);
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        transform: translate(-50%, -50%) scale(0.8);
+        background: white;
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
         text-align: center;
         z-index: 2000;
-        display: none;
+        opacity: 0;
+        transition: all 0.6s ease;
     }
-
+    .popup.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
     .popup h2 {
-        color: #ff6b6b;
-        margin-bottom: 20px;
-        font-size: 24px;
+        color: #764ba2;
+        margin-bottom: 10px;
     }
-
-    .continue-btn {
-        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-        color: white;
+    .popup button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
         border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
-        font-size: 16px;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 14px;
         cursor: pointer;
-        margin: 10px;
-        transition: transform 0.3s;
+        transition: 0.3s;
     }
-
-    .continue-btn:hover {
+    .popup button:hover {
         transform: scale(1.05);
     }
 
-    /* 掩盖层样式 */
-    .cover-layer {
+    /* 刮刮层 */
+    #mask {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.8);
         z-index: 3000;
         display: none;
+        overflow: hidden;
     }
 
-    .hidden-message {
-        position: fixed;
+    #revealText {
+        position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
-        font-size: 32px;
+        color: #fff;
+        font-size: 22px;
         text-align: center;
-        z-index: 2500;
-        display: none;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        opacity: 0.1;
+        user-select: none;
+        transition: opacity 1s ease;
     }
 
-    /* 刮刮乐画布样式 */
-    #scratchCanvas {
+    canvas {
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2"/></svg>') 12 12, auto;
     }
 </style>
 </head>
@@ -150,20 +147,14 @@
 
     <!-- 弹窗 -->
     <div class="popup" id="popup">
-        <h2>💝 别着急离开 💝</h2>
-        <p>还有更多惊喜等着你...</p>
-        <button class="continue-btn" onclick="showCoverLayer()">继续探索</button>
+        <h2>别着急离开 💕</h2>
+        <button id="continueBtn">继续看看</button>
     </div>
 
-    <!-- 掩盖层 -->
-    <div class="cover-layer" id="coverLayer">
+    <!-- 遮罩层 -->
+    <div id="mask">
+        <div id="revealText">其实……我一直在这里等你 💖</div>
         <canvas id="scratchCanvas"></canvas>
-    </div>
-
-    <!-- 隐藏的信息 -->
-    <div class="hidden-message" id="hiddenMessage">
-        💕 我永远爱你 💕<br>
-        <span style="font-size: 18px; margin-top: 10px; display: block;">愿我们的故事永远继续...</span>
     </div>
 
     <script>
@@ -186,28 +177,20 @@
         function createBarrage() {
             const barrage = document.createElement('div');
             barrage.className = 'barrage';
-
             const randomTip = tips[Math.floor(Math.random() * tips.length)];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
             barrage.textContent = randomTip;
             barrage.style.backgroundColor = randomColor;
-
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
-
             const left = (Math.random() * 1.1 - 0.05) * screenWidth;
             const top = (Math.random() * 1.1 - 0.05) * screenHeight;
-
             barrage.style.left = left + 'px';
             barrage.style.top = top + 'px';
-
             const duration = 2 + Math.random() * 2;
             barrage.style.animationDuration = duration + 's';
             barrage.style.animationDelay = (Math.random() * 0.5) + 's';
-
             document.body.appendChild(barrage);
-
             barrage.addEventListener('animationend', () => barrage.remove());
         }
 
@@ -217,117 +200,62 @@
             }
             setInterval(createBarrage, 10);
         }
+        window.onload = startBarrage;
+        document.body.addEventListener('click', createBarrage);
 
-        // 显示弹窗的函数
-        function showPopup() {
-            console.log('显示弹窗'); // 调试用
+        // 10 秒后出现弹窗
+        setTimeout(() => {
+            document.getElementById('popup').classList.add('show');
+        }, 10000);
+
+        // 点击继续按钮
+        document.getElementById('continueBtn').addEventListener('click', () => {
             const popup = document.getElementById('popup');
-            if (popup) {
-                popup.style.display = 'block';
-            }
-        }
+            popup.style.opacity = '0';
+            setTimeout(() => popup.style.display = 'none', 600);
+            showScratchLayer();
+        });
 
-        function showCoverLayer() {
-            document.getElementById('popup').style.display = 'none';
-            document.getElementById('coverLayer').style.display = 'block';
-            document.getElementById('hiddenMessage').style.display = 'block';
-            setupScratchEffect();
-        }
-
-        function setupScratchEffect() {
+        // 显示刮刮层
+        function showScratchLayer() {
+            const mask = document.getElementById('mask');
             const canvas = document.getElementById('scratchCanvas');
             const ctx = canvas.getContext('2d');
-            
-            // 设置画布尺寸
+            mask.style.display = 'block';
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            // 初始填充黑色
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+
+            // 绘制灰色遮罩层
+            ctx.fillStyle = '#444';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.globalCompositeOperation = 'destination-out';
-            
+
             let isDrawing = false;
-            const scratchRadius = 30;
-            
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('touchstart', startDrawing);
-            
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('touchmove', draw);
-            
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('touchend', stopDrawing);
-            
-            function startDrawing(e) {
-                isDrawing = true;
-                draw(e);
-            }
-            
+            const revealText = document.getElementById('revealText');
+            const scratchRadius = 40;
+
             function draw(e) {
                 if (!isDrawing) return;
-                
-                e.preventDefault();
-                
-                const rect = canvas.getBoundingClientRect();
-                let x, y;
-                
-                if (e.type.includes('touch')) {
-                    x = e.touches[0].clientX - rect.left;
-                    y = e.touches[0].clientY - rect.top;
-                } else {
-                    x = e.clientX - rect.left;
-                    y = e.clientY - rect.top;
-                }
-                
-                // 绘制圆形擦除区域
+                const x = (e.touches ? e.touches[0].clientX : e.clientX);
+                const y = (e.touches ? e.touches[0].clientY : e.clientY);
+                ctx.globalCompositeOperation = 'destination-out';
                 ctx.beginPath();
                 ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // 检查擦除进度
-                checkScratchProgress();
             }
-            
-            function stopDrawing() {
-                isDrawing = false;
-            }
-            
-            function checkScratchProgress() {
-                // 简单的进度检查
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const pixels = imageData.data;
-                let transparentPixels = 0;
-                
-                for (let i = 3; i < pixels.length; i += 4) {
-                    if (pixels[i] === 0) {
-                        transparentPixels++;
-                    }
-                }
-                
-                const progress = transparentPixels / (pixels.length / 4);
-                
-                if (progress > 0.3) {
-                    // 完全显示隐藏信息
-                    canvas.style.opacity = '0';
-                    setTimeout(() => {
-                        canvas.style.display = 'none';
-                    }, 500);
-                }
-            }
-        }
 
-        // 页面加载完成后启动所有功能
-        window.onload = function() {
-            startBarrage();
-            
-            // 10秒后显示弹窗
+            canvas.addEventListener('mousedown', () => isDrawing = true);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mousemove', draw);
+
+            canvas.addEventListener('touchstart', () => isDrawing = true);
+            canvas.addEventListener('touchend', () => isDrawing = false);
+            canvas.addEventListener('touchmove', draw);
+
+            // 一段时间后自动显露全部
             setTimeout(() => {
-                showPopup();
-            }, 10000);
-        };
-
-        document.body.addEventListener('click', createBarrage);
+                revealText.style.opacity = 1;
+            }, 3000);
+        }
     </script>
 </body>
 </html>
