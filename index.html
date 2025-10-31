@@ -136,21 +136,21 @@ canvas{
     z-index:5;
 }
 
-/* 🎈气球粒子 */
+/* 🎈改进版气球粒子：随机生成 + 淡出 */
 .balloon{
-    position:fixed;
+    position:absolute;
     font-size:22px;
-    animation:balloonUp 10s cubic-bezier(0.25,0.1,0.25,1) forwards;
+    opacity:0;
+    animation:floatFade 4s ease-in-out forwards;
     pointer-events:none;
     z-index:4000;
 }
-@keyframes balloonUp{
-    0%{transform:translate(0,0) scale(0.8);opacity:1;}
-    20%{transform:translate(var(--x1),-150px) scale(1);}
-    40%{transform:translate(var(--x2),-300px) scale(1.1);}
-    60%{transform:translate(var(--x3),-450px) scale(1.15);}
-    80%{transform:translate(var(--x4),-600px) scale(1.2);}
-    100%{transform:translate(var(--x5),-800px) scale(1.25);opacity:0;}
+
+@keyframes floatFade{
+    0%{transform:translateY(0) scale(0.9);opacity:0;}
+    10%{opacity:1;}
+    80%{opacity:1;}
+    100%{transform:translateY(-50px) scale(1.1);opacity:0;}
 }
 </style>
 </head>
@@ -267,23 +267,18 @@ function showScratchLayer(){
     canvas.addEventListener('touchmove',draw);
 }
 
-// 🎈气球漂浮效果（优化版）
+// 🎈改进：轻量漂浮 + 淡出
 function startBalloonFlow(){
     setInterval(()=>{
         const balloon=document.createElement('div');
         balloon.className='balloon';
-        balloon.textContent=Math.random()>0.5?'🎈':'🩵';
-        balloon.style.left=Math.random()*100+'vw';
-        balloon.style.bottom='-40px';
+        balloon.textContent=Math.random()>0.5?'🎈':'💖';
+        balloon.style.left=Math.random()*window.innerWidth+'px';
+        balloon.style.top=(window.innerHeight*0.6 + Math.random()*window.innerHeight*0.4)+'px';
         balloon.style.fontSize=(20+Math.random()*20)+'px';
-        balloon.style.setProperty('--x1',(Math.random()*100-50)+'px');
-        balloon.style.setProperty('--x2',(Math.random()*100-50)+'px');
-        balloon.style.setProperty('--x3',(Math.random()*100-50)+'px');
-        balloon.style.setProperty('--x4',(Math.random()*100-50)+'px');
-        balloon.style.setProperty('--x5',(Math.random()*100-50)+'px');
         document.body.appendChild(balloon);
-        setTimeout(()=>balloon.remove(),10000);
-    },1000); // 每秒生成一个，降低负载
+        balloon.addEventListener('animationend',()=>balloon.remove());
+    },300); // 每0.8秒一个，轻量流畅
 }
 </script>
 </body>
