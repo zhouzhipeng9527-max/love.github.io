@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>💕1</title>
+<title>💕</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;}
@@ -135,40 +135,24 @@ canvas{
     border-radius:20px;
     z-index:5;
 }
-
-/* 🎈改进版气球粒子：随机生成 + 淡出 */
-.balloon{
-    position:absolute;
-    font-size:22px;
-    opacity:0;
-    animation:floatFade 4s ease-in-out forwards;
-    pointer-events:none;
-    z-index:4000;
-}
-
-@keyframes floatFade{
-    0%{transform:translateY(0) scale(0.9);opacity:0;}
-    10%{opacity:1;}
-    80%{opacity:1;}
-    100%{transform:translateY(-50px) scale(1.1);opacity:0;}
-}
 </style>
 </head>
 <body>
     <div class="title" id="titleText">💕代码在重复，思念在循环💕</div>
 
-    <!-- 弹窗 -->
     <div class="popup" id="popup">
         <h2>别着急离开 💕</h2>
         <button id="continueBtn">继续看看</button>
     </div>
 
-    <!-- 局部刮刮卡 -->
     <div id="mask">
         <div id="scratchHint">请刮开下面的涂层 ✨</div>
         <div id="revealText">其实……我一直在这里等你 💖</div>
         <canvas id="scratchCanvas"></canvas>
     </div>
+
+    <!-- 新增：全局漂浮 Canvas -->
+    <canvas id="floatCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;"></canvas>
 
 <script>
 const tips=['💧 多喝水哦~','😊 保持微笑呀','✨ 每天都要元气满满','🍎 记得吃水果','🌞 保持好心情','❤️ 好好爱自己','🤗 我想你了','🌟 梦想成真','📚 金榜题名','🛌 早点休息','🍀 愿所有烦恼都消失','🌙 别熬夜','😄 今天过得开心嘛','🧥 天冷了，多穿衣服','🎉 恭喜发财','🌈 好运连连','🎯 心想事成','🌸 春暖花开','🎵 天天好心情','🚀 前程似锦'];
@@ -241,7 +225,7 @@ function showScratchLayer(){
             revealText.style.opacity=1;
             hint.style.opacity=0;
             stopBarrage();
-            startBalloonFlow();
+            startCanvasFloat();
         }
     }
 
@@ -267,18 +251,41 @@ function showScratchLayer(){
     canvas.addEventListener('touchmove',draw);
 }
 
-// 🎈改进：轻量漂浮 + 淡出
-function startBalloonFlow(){
-    setInterval(()=>{
-        const balloon=document.createElement('div');
-        balloon.className='balloon';
-        balloon.textContent=Math.random()>0.5?'🎈':'💖';
-        balloon.style.left=Math.random()*window.innerWidth+'px';
-        balloon.style.top=(window.innerHeight*0.6 + Math.random()*window.innerHeight*0.4)+'px';
-        balloon.style.fontSize=(20+Math.random()*20)+'px';
-        document.body.appendChild(balloon);
-        balloon.addEventListener('animationend',()=>balloon.remove());
-    },300); // 每0.8秒一个，轻量流畅
+// 🌈Canvas 气球 + 爱心漂浮动画（高性能版）
+function startCanvasFloat(){
+    const canvas=document.getElementById('floatCanvas');
+    const ctx=canvas.getContext('2d');
+    const w=canvas.width=window.innerWidth;
+    const h=canvas.height=window.innerHeight;
+    const particles=[];
+
+    for(let i=0;i<40;i++){
+        particles.push({
+            x:Math.random()*w,
+            y:h+Math.random()*200,
+            size:20+Math.random()*10,
+            speed:0.5+Math.random()*1,
+            drift:(Math.random()-0.5)*0.5,
+            emoji:Math.random()>0.5?'❤️':'🎈'
+        });
+    }
+
+    function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(let p of particles){
+            ctx.font=p.size+"px serif";
+            ctx.textAlign='center';
+            ctx.fillText(p.emoji,p.x,p.y);
+            p.y-=p.speed;
+            p.x+=p.drift;
+            if(p.y<-50){
+                p.y=h+Math.random()*100;
+                p.x=Math.random()*w;
+            }
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
 }
 </script>
 </body>
