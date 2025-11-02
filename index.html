@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>💕</title>
 <style>
-/* 原有样式保持不变 */
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;}
 body{
@@ -14,9 +13,146 @@ body{
     position:relative;
 }
 
-/* 原有所有样式保持不变... */
+/* 弹幕 */
+.barrage{
+    position:absolute;
+    padding:6px 10px;
+    border-radius:16px;
+    font-size:12px;
+    font-weight:bold;
+    color:#333;
+    white-space:nowrap;
+    animation:popUp 2s ease-in-out forwards;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+    z-index:1000;
+    opacity:0;
+    transform:scale(0.8);
+}
 
-/* 添加音乐控制按钮样式 */
+@keyframes popUp{
+    0%{opacity:0;transform:scale(0.5) translateY(20px);}
+    20%{opacity:1;transform:scale(1.05) translateY(0);}
+    80%{opacity:1;transform:scale(1);}
+    100%{opacity:0;transform:scale(0.8) translateY(-10px);}
+}
+
+.title{
+    position:fixed;
+    top:16px;
+    left:0;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-size:18px;
+    text-shadow:2px 2px 4px rgba(0,0,0,0.5);
+    z-index:999;
+    pointer-events:none;
+    transition:opacity 2s ease;
+}
+
+/* 弹窗 */
+.popup{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0.8);
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    text-align:center;
+    z-index:2000;
+    opacity:0;
+    transition:all 0.6s ease;
+}
+.popup.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.popup h2{color:#764ba2;margin-bottom:10px;}
+.popup button{
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    border:none;
+    color:white;
+    padding:8px 20px;
+    border-radius:20px;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.3s;
+}
+.popup button:hover{transform:scale(1.05);}
+
+/* 局部刮刮区域 */
+#mask{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:320px;
+    height:220px;
+    background:rgba(0,0,0,0.8);
+    border-radius:20px;
+    box-shadow:0 5px 25px rgba(0,0,0,0.3);
+    z-index:3000;
+    display:none;
+    overflow:hidden;
+}
+
+#revealText{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:#fff;
+    font-size:22px;
+    text-align:center;
+    opacity:0;
+    user-select:none;
+    transition:opacity 1s ease;
+    z-index:10;
+    width:100%;
+}
+
+#scratchHint{
+    position:absolute;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#fff;
+    font-size:15px;
+    opacity:0;
+    transition:opacity 1s ease;
+    animation:blink 1.5s infinite;
+    z-index:20; /* 提示文字层级最高 */
+}
+
+@keyframes blink{
+    0%,100%{opacity:0.6;}
+    50%{opacity:1;}
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    border-radius:20px;
+    z-index:5; /* Canvas 层级降低 */
+}
+
+/* 🎈气球粒子 */
+.balloon{
+    position:fixed;
+    font-size:22px;
+    animation:balloonUp 8s ease-in forwards;
+    pointer-events:none;
+    z-index:4000;
+}
+@keyframes balloonUp{
+    0%{transform:translate(0,0) scale(0.8);opacity:1;}
+    25%{transform:translate(var(--x1),-150px) scale(1);}
+    50%{transform:translate(var(--x2),-300px) scale(1.1);}
+    75%{transform:translate(var(--x3),-450px) scale(1.2);}
+    100%{transform:translate(var(--x4),-600px) scale(1.3);opacity:0;}
+}
+
+/* 音乐控制按钮 */
 .music-control {
     position: fixed;
     bottom: 20px;
@@ -49,7 +185,7 @@ body{
 </style>
 </head>
 <body>
-    <!-- 🎵 背景音乐 - 移除autoplay -->
+    <!-- 🎵 背景音乐 -->
     <audio id="bgm" src="bgm.mp3" loop></audio>
 
     <!-- 音乐控制按钮 -->
@@ -71,77 +207,7 @@ body{
     </div>
 
 <script>
-// 音频控制逻辑
-const bgm = document.getElementById('bgm');
-const musicControl = document.getElementById('musicControl');
-let audioPlayed = false;
-
-// 尝试播放音频的函数
-function playAudio() {
-    if (audioPlayed) return;
-    
-    const playPromise = bgm.play();
-    
-    if (playPromise !== undefined) {
-        playPromise.then(() => {
-            audioPlayed = true;
-            console.log('音频播放成功');
-        }).catch(error => {
-            console.log('自动播放被阻止:', error);
-            // 显示提示，需要用户交互
-            showAudioHint();
-        });
-    }
-}
-
-// 显示音频提示
-function showAudioHint() {
-    // 可以在这里添加提示文字，但为了简洁我们直接等待用户交互
-    console.log('等待用户交互来播放音频');
-}
-
-// 音乐控制按钮点击事件
-musicControl.addEventListener('click', function(e) {
-    e.stopPropagation();
-    
-    if (bgm.paused) {
-        bgm.play().then(() => {
-            audioPlayed = true;
-            musicControl.classList.remove('muted');
-        }).catch(error => {
-            console.log('播放失败:', error);
-        });
-    } else {
-        bgm.pause();
-        musicControl.classList.add('muted');
-    }
-});
-
-// 页面加载后尝试播放（可能会被浏览器阻止）
-window.addEventListener('DOMContentLoaded', function() {
-    // 设置音频音量
-    bgm.volume = 0.7;
-    
-    // 尝试自动播放（桌面端可能成功）
-    playAudio();
-});
-
-// 用户首次交互时尝试播放音频
-let firstInteraction = false;
-document.body.addEventListener('click', function() {
-    if (!firstInteraction) {
-        firstInteraction = true;
-        playAudio();
-        
-        // 同时创建弹幕（原有功能）
-        createBarrage();
-    } else {
-        createBarrage(); // 原有功能
-    }
-});
-
-// 原有的其他函数保持不变
-const tips = [    
+const tips=[    
     '💖 我想你了', 
     '🍚 记得好好吃饭', 
     '🛌 要好好睡觉', 
@@ -167,122 +233,175 @@ const tips = [
     '🍵 喝杯热茶暖暖身子',
     '🚶 累了就休息一下',
     '🎨 做点喜欢的事情',
-    '🌺 你值得所有的美好'
-];
-
-const colors = ['#FFB6C1','#87CEEB','#90EE90','#E6E6FA','#FFFFE0','#DDA0DD','#FF7F50','#FFE4C4','#7FFFD4','#FFE4E1','#F0FFF0','#FFF0F5'];
+    '🌺 你值得所有的美好'];
+const colors=['#FFB6C1','#87CEEB','#90EE90','#E6E6FA','#FFFFE0','#DDA0DD','#FF7F50','#FFE4C4','#7FFFD4','#FFE4E1','#F0FFF0','#FFF0F5'];
 let barrageInterval;
 
+// 音频控制逻辑
+const bgm = document.getElementById('bgm');
+const musicControl = document.getElementById('musicControl');
+let audioPlayed = false;
+
+// 尝试播放音频的函数
+function playAudio() {
+    if (audioPlayed) return;
+    
+    const playPromise = bgm.play();
+    
+    if (playPromise !== undefined) {
+        playPromise.then(() => {
+            audioPlayed = true;
+            console.log('音频播放成功');
+        }).catch(error => {
+            console.log('自动播放被阻止:', error);
+        });
+    }
+}
+
+// 音乐控制按钮点击事件
+musicControl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    if (bgm.paused) {
+        bgm.play().then(() => {
+            audioPlayed = true;
+            musicControl.classList.remove('muted');
+        }).catch(error => {
+            console.log('播放失败:', error);
+        });
+    } else {
+        bgm.pause();
+        musicControl.classList.add('muted');
+    }
+});
+
+// 页面加载后尝试播放
+window.addEventListener('DOMContentLoaded', function() {
+    bgm.volume = 0.7;
+    playAudio();
+});
+
+// 用户首次交互时尝试播放音频
+let firstInteraction = false;
+document.body.addEventListener('click', function() {
+    if (!firstInteraction) {
+        firstInteraction = true;
+        playAudio();
+    }
+    createBarrage(); // 原有的弹幕创建功能
+});
+
+// 原有的弹幕功能
 function createBarrage(){
-    const barrage = document.createElement('div');
-    barrage.className = 'barrage';
-    barrage.textContent = tips[Math.floor(Math.random() * tips.length)];
-    barrage.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    barrage.style.left = Math.random() * window.innerWidth + 'px';
-    barrage.style.top = Math.random() * window.innerHeight + 'px';
-    barrage.style.animationDuration = (2 + Math.random() * 2) + 's';
+    const barrage=document.createElement('div');
+    barrage.className='barrage';
+    barrage.textContent=tips[Math.floor(Math.random()*tips.length)];
+    barrage.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+    barrage.style.left=Math.random()*window.innerWidth+'px';
+    barrage.style.top=Math.random()*window.innerHeight+'px';
+    barrage.style.animationDuration=(2+Math.random()*2)+'s';
     document.body.appendChild(barrage);
-    barrage.addEventListener('animationend', () => barrage.remove());
+    barrage.addEventListener('animationend',()=>barrage.remove());
 }
 
 function startBarrage(){
-    for(let i = 0; i < 20; i++) setTimeout(createBarrage, i * 10);
-    barrageInterval = setInterval(createBarrage, 10);
+    for(let i=0;i<20;i++)setTimeout(createBarrage,i*10);
+    barrageInterval=setInterval(createBarrage,10);
 }
 
 function stopBarrage(){
     clearInterval(barrageInterval);
-    document.querySelectorAll('.barrage').forEach(b => {
-        b.style.transition = 'opacity 2s';
-        b.style.opacity = '0';
-        setTimeout(() => b.remove(), 2000);
+    document.querySelectorAll('.barrage').forEach(b=>{
+        b.style.transition='opacity 2s';
+        b.style.opacity='0';
+        setTimeout(()=>b.remove(),2000);
     });
-    document.getElementById('titleText').style.opacity = 0;
+    document.getElementById('titleText').style.opacity=0;
 }
 
 // 页面加载后开始弹幕
 window.onload = startBarrage;
 
-// 原有的弹窗和刮刮卡逻辑保持不变
-setTimeout(() => document.getElementById('popup').classList.add('show'), 10000);
+// 原有的弹窗逻辑
+setTimeout(()=>document.getElementById('popup').classList.add('show'),10000);
 
-document.getElementById('continueBtn').addEventListener('click', () => {
-    const popup = document.getElementById('popup');
-    popup.style.opacity = '0';
-    setTimeout(() => popup.style.display = 'none', 600);
+document.getElementById('continueBtn').addEventListener('click',()=>{
+    const popup=document.getElementById('popup');
+    popup.style.opacity='0';
+    setTimeout(()=>popup.style.display='none',600);
     showScratchLayer();
 });
 
+// 原有的刮刮卡功能
 function showScratchLayer(){
-    // 原有的刮刮卡逻辑
-    const mask = document.getElementById('mask');
-    const canvas = document.getElementById('scratchCanvas');
-    const ctx = canvas.getContext('2d');
-    const hint = document.getElementById('scratchHint');
-    mask.style.display = 'block';
-    canvas.width = mask.clientWidth;
-    canvas.height = mask.clientHeight;
-    ctx.fillStyle = '#777';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    hint.style.opacity = 1;
+    const mask=document.getElementById('mask');
+    const canvas=document.getElementById('scratchCanvas');
+    const ctx=canvas.getContext('2d');
+    const hint=document.getElementById('scratchHint');
+    mask.style.display='block';
+    canvas.width=mask.clientWidth;
+    canvas.height=mask.clientHeight;
+    ctx.fillStyle='#777';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    hint.style.opacity=1;
 
-    let isDrawing = false;
-    const revealText = document.getElementById('revealText');
-    const scratchRadius = 30;
+    let isDrawing=false;
+    const revealText=document.getElementById('revealText');
+    const scratchRadius=30;
 
     function checkReveal(){
-        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let cleared = 0;
-        for(let i = 3; i < imgData.data.length; i += 4){
-            if(imgData.data[i] < 128) cleared++;
+        const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+        let cleared=0;
+        for(let i=3;i<imgData.data.length;i+=4){
+            if(imgData.data[i]<128)cleared++;
         }
-        const percent = cleared / (canvas.width * canvas.height);
-        if(percent > 0.5){
-            revealText.style.opacity = 1;
-            hint.style.opacity = 0;
+        const percent=cleared/(canvas.width*canvas.height);
+        if(percent>0.5){
+            revealText.style.opacity=1;
+            hint.style.opacity=0;
             stopBarrage();
             startBalloonFlow();
         }
     }
 
     function draw(e){
-        if(!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-        ctx.globalCompositeOperation = 'destination-out';
+        if(!isDrawing)return;
+        const rect=canvas.getBoundingClientRect();
+        const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+        const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+        ctx.globalCompositeOperation='destination-out';
         ctx.beginPath();
-        ctx.arc(x, y, scratchRadius, 0, Math.PI * 2);
+        ctx.arc(x,y,scratchRadius,0,Math.PI*2);
         ctx.fill();
-        hint.style.opacity = 0;
+        hint.style.opacity=0;
         checkReveal();
     }
 
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('mouseup', () => isDrawing = false);
-    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mousedown',()=>isDrawing=true);
+    canvas.addEventListener('mouseup',()=>isDrawing=false);
+    canvas.addEventListener('mousemove',draw);
 
-    canvas.addEventListener('touchstart', () => isDrawing = true);
-    canvas.addEventListener('touchend', () => isDrawing = false);
-    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchstart',()=>isDrawing=true);
+    canvas.addEventListener('touchend',()=>isDrawing=false);
+    canvas.addEventListener('touchmove',draw);
 }
 
 // 🎈气球漂浮效果
 function startBalloonFlow(){
-    setInterval(() => {
-        const balloon = document.createElement('div');
-        balloon.className = 'balloon';
-        balloon.textContent = Math.random() > 0.5 ? '🎈' : '🩵';
-        balloon.style.left = Math.random() * 100 + 'vw';
-        balloon.style.bottom = '-40px';
-        balloon.style.fontSize = (20 + Math.random() * 20) + 'px';
-        balloon.style.setProperty('--x1', (Math.random() * 100 - 50) + 'px');
-        balloon.style.setProperty('--x2', (Math.random() * 100 - 50) + 'px');
-        balloon.style.setProperty('--x3', (Math.random() * 100 - 50) + 'px');
-        balloon.style.setProperty('--x4', (Math.random() * 100 - 50) + 'px');
+    setInterval(()=>{
+        const balloon=document.createElement('div');
+        balloon.className='balloon';
+        balloon.textContent=Math.random()>0.5?'🎈':'🩵';
+        balloon.style.left=Math.random()*100+'vw';
+        balloon.style.bottom='-40px';
+        balloon.style.fontSize=(20+Math.random()*20)+'px';
+        balloon.style.setProperty('--x1',(Math.random()*100-50)+'px');
+        balloon.style.setProperty('--x2',(Math.random()*100-50)+'px');
+        balloon.style.setProperty('--x3',(Math.random()*100-50)+'px');
+        balloon.style.setProperty('--x4',(Math.random()*100-50)+'px');
         document.body.appendChild(balloon);
-        setTimeout(() => balloon.remove(), 8000);
-    }, 500);
+        setTimeout(()=>balloon.remove(),8000);
+    },500);
 }
 </script>
 </body>
